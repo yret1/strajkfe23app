@@ -1,17 +1,30 @@
 import Image from "next/image";
 import { Booking } from "../interfaces/interface";
 import { AnimatePresence, motion } from "framer-motion";
+import Errordisp from "../Error/Errordisp";
 
 interface BookingHandler {
   Booking: Booking;
   setBooking: (booking: Booking) => void;
   sendRequest: () => void;
+  dates: { label: string; value: string }[];
+  times: string[];
+  setSelectedDate: (date: string) => void;
+  setSelectedTime: (time: string) => void;
+  laneError: boolean;
+  peopleError: boolean;
 }
 
 const Bookingpage: React.FC<BookingHandler> = ({
   Booking,
   setBooking,
   sendRequest,
+  dates,
+  times,
+  setSelectedDate,
+  setSelectedTime,
+  laneError,
+  peopleError,
 }) => {
   return (
     <section className="w-screen min-h-screen p-6 flex flex-col">
@@ -42,8 +55,16 @@ const Bookingpage: React.FC<BookingHandler> = ({
           <div className="form-group">
             <select
               id="date"
+              onChange={(e) => setSelectedDate(e.currentTarget.value)}
               className="input-field border-2 rounded-md border-headers bg-background text-inputtext text-xl work"
-            />
+            >
+              <option value="">Date</option>
+              {dates.map((date) => (
+                <option key={date.value} value={date.value}>
+                  {date.label}
+                </option>
+              ))}
+            </select>
             <label htmlFor="date" className="input-label text-headers work">
               DATE
             </label>
@@ -51,22 +72,15 @@ const Bookingpage: React.FC<BookingHandler> = ({
           <div className="form-group">
             <select
               id="Time"
+              onChange={(e) => setSelectedTime(e.currentTarget.value)}
               className="input-field border-2 rounded-md border-headers bg-background text-inputtext text-xl work"
             >
-              <option value="">When</option>
-              <option value="09:00">09:00</option>
-              <option value="10:00">10:00</option>
-              <option value="11:00">11:00</option>
-              <option value="12:00">12:00</option>
-              <option value="13:00">13:00</option>
-              <option value="14:00">14:00</option>
-              <option value="15:00">15:00</option>
-              <option value="16:00">16:00</option>
-              <option value="17:00">17:00</option>
-              <option value="18:00">18:00</option>
-              <option value="19:00">19:00</option>
-              <option value="20:00">20:00</option>
-              <option value="21:00">21:00</option>
+              <option value="">Time</option>
+              {times.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
             </select>
             <label htmlFor="Time" className="input-label text-headers work">
               TIME
@@ -86,7 +100,7 @@ const Bookingpage: React.FC<BookingHandler> = ({
               }
               className="input-field border-2 rounded-md border-headers bg-background text-inputtext text-xl work"
             >
-              <option value="">-- How many people? --</option>
+              <option value="">How many people?</option>
               <option value="1">1 Bowler</option>
               <option value="2">2 Bowlers</option>
               <option value="3">3 Bowlers</option>
@@ -113,14 +127,21 @@ const Bookingpage: React.FC<BookingHandler> = ({
             </label>
           </div>
         </fieldset>
+        {peopleError && <Errordisp peopleError />}
         <fieldset className="w-full flex gap-4 py-4">
           <div className="form-group">
             <select
               id="lanes"
               className="input-field border-2 rounded-md border-headers bg-background text-inputtext text-xl work"
+              onChange={(e) =>
+                setBooking({
+                  ...Booking,
+                  lanes: parseInt(e.currentTarget.value),
+                })
+              }
             >
               <option value="-- Please Select Lanes --">
-                -- Please Select Lanes --
+                Please Select Lanes
               </option>
               <option value="1">1 Lane</option>
               <option value="2">2 Lanes</option>
@@ -134,6 +155,7 @@ const Bookingpage: React.FC<BookingHandler> = ({
             </label>
           </div>
         </fieldset>
+        {laneError && <Errordisp laneError />}
       </section>
       <AnimatePresence>
         {Booking.people > 0 && (
@@ -157,8 +179,16 @@ const Bookingpage: React.FC<BookingHandler> = ({
                     <div className="form-group">
                       <select
                         id="shoe"
+                        onChange={(e) => {
+                          const shoes = Booking.shoes;
+                          shoes[index] = parseInt(e.currentTarget.value);
+                          setBooking({ ...Booking, shoes });
+                        }}
                         className="input-field border-2 rounded-md border-headers bg-background text-inputtext text-xl work"
                       >
+                        <option defaultChecked value="">
+                          Shoe Size?
+                        </option>
                         <option value="30"> EURO 30</option>
                         <option value="31"> EURO 31</option>
                         <option value="32"> EURO 32</option>

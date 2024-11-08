@@ -56,3 +56,18 @@ body {
   font-size: 0.8rem;
 
 }
+
+.error{
+  position: relative;
+}
+
+.error::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background-color: #EC315A;
+  top: -10%;
+  left: 50%;
+  rotate: 45deg;
+}

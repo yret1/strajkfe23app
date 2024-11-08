@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${BebasNeue.variable} ${workSans.variable} antialiased`}
+        className={`${BebasNeue.variable} ${workSans.variable} antialiased bg-background`}
       >
         {children}
       </body>

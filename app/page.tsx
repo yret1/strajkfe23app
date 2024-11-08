@@ -1,14 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Booking, Bookingresponse } from "./interfaces/interface";
 import Loading from "./pages/Loading";
 import Bookingpage from "./pages/Booking";
 import ConfirmedBooking from "./pages/ConfirmedBooking";
+import { b } from "framer-motion/client";
+import Nav from "./pages/comps/Nav";
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [bookingConfirmed, setBookingConfirmed] = useState<boolean>(true);
+  const [bookingConfirmed, setBookingConfirmed] = useState<boolean>(false);
+  const [dates, setDates] = useState<{ label: string; value: string }[]>([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [selectedTime, setSelectedTime] = useState("");
+  const [times, setTimes] = useState<string[]>([]);
+
+  const [laneError, setLaneError] = useState<boolean>(false);
+  const [peopleError, setPeopleError] = useState<boolean>(false);
+
+  useEffect(() => {
+    //Generate dates for booking. Generates 10 days from current date
+    const generateDates = () => {
+      const currentDate = new Date();
+      const dateArray = [];
+
+      for (let i = 0; i < 10; i++) {
+        const date = new Date(currentDate);
+        date.setDate(currentDate.getDate() + i);
+
+        const formattedDate = date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+        });
+
+        dateArray.push({
+          label: formattedDate,
+          value: date.toISOString().split("T")[0],
+        });
+      }
+
+      console.log(dateArray);
+      return dateArray;
+    };
+
+    setDates(generateDates());
+  }, []);
+
+  useEffect(() => {
+    //Generate times for booking based on opening hours and current time
+    const generateTimes = () => {
+      const openingHour = 9;
+      const closingHour = 21;
+      const currentTime = new Date();
+
+      const currentDateString = currentTime.toISOString().split("T")[0];
+      const currentHour = currentTime.getHours();
+
+      const selectedDateString = new Date(selectedDate)
+        .toISOString()
+        .split("T")[0];
+
+      const timeArray = [];
+      const isToday = selectedDateString === currentDateString;
+
+      for (let hour = openingHour; hour <= closingHour; hour++) {
+        if (!isToday || hour > currentHour) {
+          const formattedTime = `${hour.toString().padStart(2, "0")}:00`;
+          timeArray.push(formattedTime);
+        }
+      }
+      return timeArray;
+    };
+
+    if (selectedDate) {
+      setTimes(generateTimes());
+    }
+  }, [selectedDate]);
+
+  // Combine time and date
+  useEffect(() => {
+    if (selectedDate && selectedTime) {
+      const formattedDateTime = `${selectedDate}T${selectedTime}`;
+
+      setBooking((prevBookin) => ({ ...prevBookin, when: formattedDateTime }));
+    }
+  }, [selectedDate, selectedTime]);
+
+  //Booking for request
   const [booking, setBooking] = useState<Booking>({
     when: "",
     lanes: 0,
@@ -16,6 +97,7 @@ export default function Home() {
     shoes: [],
   });
 
+  //Booking confirmation response
   const [bookingResponse, setBookingResponse] = useState<Bookingresponse>({
     when: "",
     lanes: 0,
@@ -23,8 +105,28 @@ export default function Home() {
     shoes: [],
     price: 0,
     id: "",
-    active: true,
+    active: false,
   });
+
+  useEffect(() => {
+    //Make sure conditions for lanebooking are met.
+
+    const peoplePerLane = booking.people / booking.lanes;
+
+    if (peoplePerLane < 1) {
+      setLaneError(true);
+      setPeopleError(false);
+    } else if (peoplePerLane > 4) {
+      setPeopleError(true);
+      setLaneError(false);
+    } else if (booking.lanes > booking.people) {
+      setPeopleError(true);
+      setLaneError(false);
+    } else {
+      setLaneError(false);
+      setPeopleError(false);
+    }
+  }, [booking]);
 
   const resetBooking = () => {
     setBooking({
@@ -52,7 +154,11 @@ export default function Home() {
       booking.people !== 0 &&
       booking.shoes.length !== 0
     ) {
-      if (booking.people == booking.shoes.length) {
+      if (
+        booking.people == booking.shoes.length &&
+        !laneError &&
+        !peopleError
+      ) {
         setLoading(true);
         try {
           const response = await fetch("/api/reqbooking", {
@@ -84,6 +190,7 @@ export default function Home() {
 
   return (
     <section className="w-screen min-h-screen bg-background">
+      <Nav />
       {loading && <Loading />}
 
       {!loading && !bookingResponse.active && !bookingConfirmed && (
@@ -91,6 +198,12 @@ export default function Home() {
           Booking={booking}
           setBooking={setBooking}
           sendRequest={sendRequest}
+          dates={dates}
+          times={times}
+          setSelectedDate={setSelectedDate}
+          setSelectedTime={setSelectedTime}
+          laneError={laneError}
+          peopleError={peopleError}
         />
       )}
 

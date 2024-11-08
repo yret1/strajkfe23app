@@ -11,6 +11,24 @@ const ConfirmedBooking: React.FC<Bookingconfirmedprops> = ({
   bookingResponse,
   resetBooking,
 }) => {
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+
+    // Format the date to "d MMM" (e.g., "8 Nov")
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+    });
+
+    // Get the time in "HH:00" format
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${formattedDate}, ${formattedTime}`;
+  };
   return (
     <section className="w-full p-6">
       <section className="w-full flex flex-col justify-center items-center gap-2 my-6">
@@ -36,7 +54,9 @@ const ConfirmedBooking: React.FC<Bookingconfirmedprops> = ({
       <section className="w-full flex flex-col gap-5 py-10">
         <div className="form-group">
           <section className="input-field border-[1px] rounded-md border-headers bg-background text-inputtext text-xl work">
-            <option value={bookingResponse.when}>{bookingResponse.when}</option>
+            <option value={bookingResponse.when}>
+              {formatDateTime(bookingResponse.when)}
+            </option>
           </section>
 
           <label htmlFor="lanes" className="input-label text-headers work">
