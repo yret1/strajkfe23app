@@ -5,21 +5,26 @@ import { Booking, Bookingresponse } from "./interfaces/interface";
 import Loading from "./pages/Loading";
 import Bookingpage from "./pages/Booking";
 import ConfirmedBooking from "./pages/ConfirmedBooking";
-import { b } from "framer-motion/client";
 import Nav from "./pages/comps/Nav";
 
 export default function Home() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [bookingConfirmed, setBookingConfirmed] = useState<boolean>(false);
   const [dates, setDates] = useState<{ label: string; value: string }[]>([]);
-  const [selectedDate, setSelectedDate] = useState(
+  const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [times, setTimes] = useState<string[]>([]);
 
   const [laneError, setLaneError] = useState<boolean>(false);
   const [peopleError, setPeopleError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  }, []);
 
   useEffect(() => {
     //Generate dates for booking. Generates 10 days from current date
@@ -190,7 +195,7 @@ export default function Home() {
 
   return (
     <section className="w-screen min-h-screen bg-background">
-      <Nav />
+      {!loading && <Nav resetBooking={resetBooking} />}
       {loading && <Loading />}
 
       {!loading && !bookingResponse.active && !bookingConfirmed && (

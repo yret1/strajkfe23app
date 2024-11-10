@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const Nav = () => {
+interface NavProps {
+  resetBooking: () => void;
+}
+const Nav: React.FC<NavProps> = ({ resetBooking }) => {
   const [open, setOpen] = useState<boolean>(false);
+
+  const toggleNavigate = () => {
+    setOpen(!open);
+    resetBooking();
+  };
 
   return (
     <section className="w-screen p-2 sticky top-0 left-0 flex justify-start items-center z-50">
@@ -25,13 +33,13 @@ const Nav = () => {
             className="absolute z-40 top-0 left-0 bg-[#1C1919] w-screen h-screen flex flex-col justify-center items-center gap-4"
           >
             <p
-              onClick={() => setOpen(!open)}
+              onClick={toggleNavigate}
               className="beba text-cta text-6xl tracking-wide"
             >
               BOOKING
             </p>
             <p
-              onClick={() => setOpen(!open)}
+              onClick={toggleNavigate}
               className="beba text-cta text-6xl tracking-wide"
             >
               CONFIRMATION
